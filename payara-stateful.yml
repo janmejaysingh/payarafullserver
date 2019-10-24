@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  labels:
+    app: payara
+  name: payara
+  namespace: payara
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payara
+  serviceName: payara
+  template:
+    metadata:
+      labels:
+        app: payara
+    spec:
+      containers:
+        - image: 'docker-registry.default.svc:5000/payara/payara:latest'
+          imagePullPolicy: Always
+          name: payara
+          command: ["/bin/sh", "-ec", "while :; do echo '.'; sleep 5 ; done"]
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
