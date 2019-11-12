@@ -67,5 +67,7 @@ RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fi
         ${PAYARA_DIR}/glassfish/domains/${DOMAIN_NAME}/logs \
         ${PAYARA_DIR}/glassfish/domains/domain1
 
-
+RUN touch ${CONFIG_DIR}/pre-boot-commands.asadmin && \
+    touch ${CONFIG_DIR}/post-boot-commands.asadmin &&\
+	chmod +w ${CONFIG_DIR}/*
 COPY sample.war $DEPLOY_DIR
