@@ -51,12 +51,12 @@ parameters:
   value: latest
   required: true
 - name: ROUTE1
-  displayName: Instance name
+  displayName: ROUTE1
   value: payara-8080
   description: This is the route for the 8080.
   required: true
 - name: ROUTE2
-  displayName: Instance name
+  displayName: ROUTE2
   value: payara-4848
   description:This is the route for the 4848.
   required: true
