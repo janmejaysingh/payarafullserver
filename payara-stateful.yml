@@ -1,31 +1,175 @@
-apiVersion: apps/v1beta1
-kind: StatefulSet
+kind: "Template"
+apiVersion: "v1"
 metadata:
-  labels:
-    app: payara
-  name: payara
-  namespace: payara
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: payara
-  serviceName: payara
-  template:
-    metadata:
-      labels:
-        app: payara
-    spec:
-      containers:
-        - image: 'docker-registry.default.svc:5000/payara/payara:latest'
+  name: "payara-sample-example" 
+  annotations:
+    description: "An example of deploying angular 8 code in payara server" 
+    iconClass: "icon-php"
+labels:
+  template: payara-sample-example
+  component: payara-sample
+parameters:
+- name: NAME
+  displayName: Instance name
+  value: payara-sample
+  description: The name of the instance. The name will be used for the stateful set, the service and the config map.
+  required: true
+- name: REPLICAS
+  displayName: Number of replicas
+  value: '3'
+  description: The initial number of replicas.
+  required: true
+- name: MEMORY  
+  displayName: Memory
+  value: 2G
+  description: The amount of memory to request for each pod (values must be specified as M or G).
+  required: true
+- name: CPU
+  displayName: CPU
+  value: 500m
+  description: The amount of CPU to request for each pod.
+  required: true
+- name: IMAGE_NAME
+  displayName: Docker image name
+  description: The name of the Docker image to instantiate.
+  value: payara
+  required: true
+- name: DOCKER_REGISTRY
+  displayName: Docker registry
+  description: The Docker registry address.
+  value: 172.30.1.1:5000
+  required: true
+- name: NAMESPACE
+  displayName: Namespace
+  description: The namespace the Docker image is located in.
+  value: my-project
+  required: true
+- name: VERSION
+  displayName: Docker image version
+  description: The version of the Docker image.
+  value: latest
+  required: true
+objects:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: ${NAME}-robot
+    labels:
+      app: ${NAME}
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: ${NAME}-robot-view
+    labels:
+      app: ${NAME}
+  roleRef:
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: ${NAME}-robot
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: ${NAME}-robot-edit
+    labels:
+      app: ${NAME}
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: ${NAME}-robot
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${NAME}-ldap-secret
+    labels:
+      app: ${NAME}
+  stringData:
+    username: ${LDAP_TECHNICAL_USER_NAME}
+    password: ${LDAP_TECHNICAL_USER_PASSWORD}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${NAME}-certificates
+    labels:
+      app: ${NAME}
+  stringData:
+    bmw-ca-certs: ${BMW_CA_CERTS}
+    server-cert: ${SERVER_CERT}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${NAME}-service
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: ${NAME}-os-certs
+    labels:
+      app: ${NAME}
+  spec:
+    ports:
+    - port: 8080
+      name: payara-internal
+    - port: 8081
+      name: payara-external
+    - port: 4048
+      name: metrics
+    clusterIP: None
+    selector:
+      app: ${NAME}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}-service
+    labels:
+      app: ${NAME}
+  spec:
+    to:
+      kind: Service
+      name: ${NAME}-service
+    port:
+      targetPort: kafka-external
+    tls:
+      termination: passthrough
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
+  metadata:
+    name: ${NAME}
+    labels:
+      app: ${NAME}
+  spec:
+    serviceName: ${NAME}-service
+    replicas: ${{REPLICAS}}
+    template:
+      metadata:
+        labels:
+          app: ${NAME}
+          imageName: ${IMAGE_NAME}
+          imageVersion: ${VERSION}
+      spec:
+        containers:
+        - name: ${NAME}
           imagePullPolicy: Always
-          name: payara
-          command: ["/bin/sh", "-ec", "while :; do echo '.'; sleep 5 ; done"]
+          image: ${DOCKER_REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${VERSION}
+          resources:
+            requests:
+              memory: ${MEMORY}
+              cpu: ${CPU}
+          ports:
+          - containerPort: 8080
+            name: payara-internal
+          - containerPort: 8081
+            name: payara-external
+          - containerPort: 4048
+            name: metrics
+          env:
+          - name: PAYARA_HEAP_OPTS
+            value: -Xmx${MEMORY} -Xms${MEMORY}
+          command:
+            ["sh","-c","${SCRIPT_DIR}/init_1_generate_deploy_commands.sh && exec ${SCRIPT_DIR}/startInForeground.sh"]
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+		    securityContext:
+         allowPrivilegeEscalation: false 
