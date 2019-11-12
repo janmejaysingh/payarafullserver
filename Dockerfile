@@ -30,13 +30,14 @@ ENV HOME_DIR=/opt/payara\
 COPY  bin/*.sh ${SCRIPT_DIR}/
 RUN chmod +x ${SCRIPT_DIR}/*
 # Create and set the Payara user and working directory owned by the new user
-RUN groupadd payara && \
+RUN groupadd -g 1001 payara && \
     useradd -u 1001 -b ${HOME_DIR} -M -s /bin/bash -d ${HOME_DIR} payara -g payara && \
     echo payara:payara | chpasswd && \
     mkdir -p ${DEPLOY_DIR} && \
     mkdir -p ${CONFIG_DIR} && \
     mkdir -p ${SCRIPT_DIR} && \
-    chown -R payara:payara ${HOME_DIR}
+    chown -R payara:payara ${HOME_DIR} && \
+	id payara
 USER payara
 WORKDIR ${HOME_DIR}
 
@@ -65,8 +66,6 @@ RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fi
         ${PAYARA_DIR}/glassfish/domains/${DOMAIN_NAME}/osgi-cache \
         ${PAYARA_DIR}/glassfish/domains/${DOMAIN_NAME}/logs \
         ${PAYARA_DIR}/glassfish/domains/domain1
-
-
 
 
 COPY sample.war $DEPLOY_DIR
