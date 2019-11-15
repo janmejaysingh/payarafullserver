@@ -43,6 +43,7 @@ WORKDIR ${HOME_DIR}
 
 # Copy across docker scripts
 COPY  bin/*.sh ${SCRIPT_DIR}/
+RUN chmod -R +x ${SCRIPT_DIR}/*
 # Download and unzip the Payara distribution
 RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fish/payara-prerelease.zip && \
     chown payara:payara payara.zip && \
@@ -69,7 +70,6 @@ RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fi
         ${PAYARA_DIR}/glassfish/domains/${DOMAIN_NAME}/logs \
         ${PAYARA_DIR}/glassfish/domains/domain1
 
-RUN chmod +x ${SCRIPT_DIR}/*
 
 COPY sample.war $DEPLOY_DIR
 
