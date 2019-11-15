@@ -1,3 +1,4 @@
+
 FROM openjdk:8u171-jdk
 
 # Default payara ports to expose
@@ -26,18 +27,14 @@ ENV HOME_DIR=/opt/payara\
     POSTBOOT_COMMANDS=/opt/payara/config/post-boot-commands.asadmin\
     PREBOOT_COMMANDS=/opt/payara/config/pre-boot-commands.asadmin
 
-# Copy across docker scripts
-COPY  bin/*.sh ${SCRIPT_DIR}/
-RUN chmod +x ${SCRIPT_DIR}/*
 # Create and set the Payara user and working directory owned by the new user
-RUN groupadd -g 1001 payara && \
-    useradd -u 1001 -b ${HOME_DIR} -M -s /bin/bash -d ${HOME_DIR} payara -g payara && \
+RUN groupadd payara && \
+    useradd -b ${HOME_DIR} -M -s /bin/bash -d ${HOME_DIR} payara -g payara && \
     echo payara:payara | chpasswd && \
     mkdir -p ${DEPLOY_DIR} && \
     mkdir -p ${CONFIG_DIR} && \
     mkdir -p ${SCRIPT_DIR} && \
-    chown -R payara:payara ${HOME_DIR} && \
-	id payara
+    chown -R payara:payara ${HOME_DIR}
 USER payara
 WORKDIR ${HOME_DIR}
 
@@ -67,7 +64,10 @@ RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fi
         ${PAYARA_DIR}/glassfish/domains/${DOMAIN_NAME}/logs \
         ${PAYARA_DIR}/glassfish/domains/domain1
 
-RUN touch ${CONFIG_DIR}/pre-boot-commands.asadmin && \
-    touch ${CONFIG_DIR}/post-boot-commands.asadmin &&\
-	chmod +w ${CONFIG_DIR}/*
+# Copy across docker scripts
+COPY chown payara:payara bin/*.sh ${SCRIPT_DIR}/
+RUN chmod +x ${SCRIPT_DIR}/* && chmod -R g+w ${HOME_DIR} && chgrp -R :0 ${HOME_DIR}
+
 COPY sample.war $DEPLOY_DIR
+
+CMD ${SCRIPT_DIR}/generate_deploy_commands.sh && exec ${SCRIPT_DIR}/startInForeground.sh
