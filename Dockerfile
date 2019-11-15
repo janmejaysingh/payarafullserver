@@ -27,6 +27,8 @@ ENV HOME_DIR=/opt/payara\
     POSTBOOT_COMMANDS=/opt/payara/config/post-boot-commands.asadmin\
     PREBOOT_COMMANDS=/opt/payara/config/pre-boot-commands.asadmin
 
+
+
 # Create and set the Payara user and working directory owned by the new user
 RUN groupadd payara && \
     useradd -b ${HOME_DIR} -M -s /bin/bash -d ${HOME_DIR} payara -g payara && \
@@ -34,10 +36,13 @@ RUN groupadd payara && \
     mkdir -p ${DEPLOY_DIR} && \
     mkdir -p ${CONFIG_DIR} && \
     mkdir -p ${SCRIPT_DIR} && \
-    chown -R payara:payara ${HOME_DIR}
+    chown -R payara:0 ${HOME_DIR} &&\
+    chmod -R g+wx ${HOME_DIR}
 USER payara
 WORKDIR ${HOME_DIR}
 
+# Copy across docker scripts
+COPY  bin/*.sh ${SCRIPT_DIR}/
 # Download and unzip the Payara distribution
 RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fish/payara-prerelease.zip && \
     chown payara:payara payara.zip && \
@@ -64,9 +69,7 @@ RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fi
         ${PAYARA_DIR}/glassfish/domains/${DOMAIN_NAME}/logs \
         ${PAYARA_DIR}/glassfish/domains/domain1
 
-# Copy across docker scripts
-COPY --chown=payara:payara bin/*.sh ${SCRIPT_DIR}/
-RUN chown -R payara:payara ${SCRIPT_DIR}/ && chmod +x ${SCRIPT_DIR}/* && chmod -R g+w ${HOME_DIR} && chgrp -R :0 ${HOME_DIR}
+RUN chmod +x ${SCRIPT_DIR}/*
 
 COPY sample.war $DEPLOY_DIR
 
