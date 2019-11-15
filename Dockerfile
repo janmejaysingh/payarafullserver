@@ -42,7 +42,7 @@ USER payara
 WORKDIR ${HOME_DIR}
 
 # Copy across docker scripts
-COPY  bin/*.sh ${SCRIPT_DIR}/
+ADD  bin/*.sh ${SCRIPT_DIR}/
 RUN chmod -R +x ${SCRIPT_DIR}/*
 # Download and unzip the Payara distribution
 RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fish/payara-prerelease.zip && \
