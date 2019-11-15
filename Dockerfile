@@ -66,7 +66,7 @@ RUN wget --no-verbose -O payara.zip https://s3-eu-west-1.amazonaws.com/payara.fi
 
 # Copy across docker scripts
 COPY  bin/*.sh ${SCRIPT_DIR}/
-RUN chmod +x ${SCRIPT_DIR}/* && chmod -R g+w ${HOME_DIR} && chgrp -R :0 ${HOME_DIR}
+RUN chown -R payara:payara ${SCRIPT_DIR}/ && chmod +x ${SCRIPT_DIR}/* && chmod -R g+w ${HOME_DIR} && chgrp -R :0 ${HOME_DIR}
 
 COPY sample.war $DEPLOY_DIR
 
