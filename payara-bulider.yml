@@ -19,7 +19,7 @@ parameters:
 - name: GIT_REF
   displayName: Git branch
   description: The Git source reference.
-  value: master
+  value: payara_micro
   required: true
 - name: IMAGE_STREAM_NAME
   displayName: Image Stream Name
