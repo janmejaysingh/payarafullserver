@@ -4,7 +4,7 @@ metadata:
   name: "payara-sample-example" 
   annotations:
     description: "An example of deploying angular 8 code in payara server" 
-    iconClass: "icon-php"
+    iconClass: "icon-infinispan"
 labels:
   template: payara-sample-example
   component: payara-sample
