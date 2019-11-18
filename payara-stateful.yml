@@ -108,9 +108,9 @@ objects:
     ports:
     - port: 8080
       name: payara-internal
-    - port: 8081
+    - port: 8181
       name: payara-external
-    - port: 4048
+    - port: 4848
       name: metrics
     clusterIP: None
     selector:
@@ -126,7 +126,7 @@ objects:
       kind: Service
       name: ${NAME}-service
     port:
-      targetPort: kafka-external
+      targetPort: payara-internal
     tls:
       termination: passthrough
 - apiVersion: apps/v1beta1
@@ -156,9 +156,9 @@ objects:
           ports:
           - containerPort: 8080
             name: payara-internal
-          - containerPort: 8081
+          - containerPort: 8181
             name: payara-external
-          - containerPort: 4048
+          - containerPort: 4648
             name: metrics
           env:
           - name: PAYARA_HEAP_OPTS
