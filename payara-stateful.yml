@@ -163,13 +163,11 @@ objects:
           env:
           - name: PAYARA_HEAP_OPTS
             value: -Xmx${MEMORY} -Xms${MEMORY}
-          command:
-            ["sh","-c","${SCRIPT_DIR}/init_1_generate_deploy_commands.sh && exec ${SCRIPT_DIR}/startInForeground.sh"]
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
-		    securityContext:
+        securityContext:
          allowPrivilegeEscalation: false 
