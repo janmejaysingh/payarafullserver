@@ -1,2 +1,2 @@
 # payarafullserver
-# the is payar-micro with docker file builder and statfullset.
+# This is payar-micro with docker file builder and statfullset.
