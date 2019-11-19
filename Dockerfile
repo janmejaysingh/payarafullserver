@@ -29,4 +29,4 @@ ENTRYPOINT ["java", "-jar", "/opt/payara/payara-micro.jar"]
 CMD ["--deploymentDir", "/opt/payara/deployments"]
 
 COPY sample.war $DEPLOY_DIR
-COPY SpecialApp.war $DEPLOY_DIR
+

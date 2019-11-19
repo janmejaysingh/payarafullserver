@@ -128,7 +128,7 @@ objects:
     port:
       targetPort: payara-internal
     tls:
-      termination: passthrough
+      termination: edge
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
